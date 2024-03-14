@@ -2,12 +2,25 @@ import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
 
-import { login } from "../../shopify.server";
+import {authenticate, BEAUTIFUL_PLAN, login} from "../../shopify.server";
 
 import styles from "./styles.module.css";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const url = new URL(request.url);
+
+  const { billing } = await authenticate.admin(request);
+  await billing.require({
+    plans: [BEAUTIFUL_PLAN],
+    onFailure: async () => {
+      const response = await billing.request({
+        plan: BEAUTIFUL_PLAN,
+        isTest: true,
+        returnUrl: "",
+      })
+      return response;
+    }
+  })
 
   if (url.searchParams.get("shop")) {
     throw redirect(`/app?${url.searchParams.toString()}`);

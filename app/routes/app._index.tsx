@@ -3,7 +3,7 @@ import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import {useState, useCallback} from 'react';
 
 import { json } from "@remix-run/node";
-import { useActionData, useNavigation, useSubmit } from "@remix-run/react";
+import { useActionData, useLoaderData, useNavigation, useSubmit } from "@remix-run/react";
 import {
   Page,
   Layout,
@@ -19,8 +19,35 @@ import {
 import { authenticate } from "../shopify.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await authenticate.admin(request);
-  return null;
+  const { admin } = await authenticate.admin(request);
+
+  const response = await admin.graphql(
+    `#graphql
+      query AppInstallationMetafields($ownerId: ID!) {
+          appInstallation(id: $ownerId) {
+            metafields(first: 10) {
+              edges {
+                node {
+                  namespace
+                  key
+                  value
+                }
+              }
+            }
+          }
+        }
+      `,
+    {
+      variables: {
+        ownerId: "gid://shopify/AppInstallation/460629049559"
+      },
+    },
+  );
+  const responseJson = await response.json();
+
+  return json({
+    data: responseJson.data.appInstallation.metafields.edges,
+  });
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
@@ -28,10 +55,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const position = formData.get("position");
   const direction = formData.get("direction");
   const company = formData.get("company");
-
-  console.log(formData);
   const data = {position, direction, company};
-  console.log(JSON.stringify(data));
   const { admin } = await authenticate.admin(request);
   const response = await admin.graphql(
     `#graphql
@@ -70,12 +94,15 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function Index() {
-  const [position, setPosition] = useState<string[]>(['center']);
-  const [company, setCompany] = useState<string>('');
-  const [direction, setDirection] = useState<string[]>(['horizontal']);
+  const { data } = useLoaderData<typeof loader>();
+  const node = data.find((n: any) => (n.node.namespace === 'beautiful_consent' && n.node.key === 'config') ).node
+  const values = JSON.parse(node.value);
+  const [position, setPosition] = useState<string[]>([values.position]);
+  const [company, setCompany] = useState<string>(values.company);
+  const [direction, setDirection] = useState<string[]>([values.direction]);
   const actionData = useActionData<typeof action>();
   const submit = useSubmit();
-
+  
   const test = actionData?.data;
 
   useEffect(() => {
