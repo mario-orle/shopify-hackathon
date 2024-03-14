@@ -71,8 +71,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const position = formData.get("position");
   const direction = formData.get("direction");
   const company = formData.get("company");
+  const colorSchema = formData.get("colorSchema");
+  console.log('colorchema', colorSchema);
   const pillPosition = formData.get("pillPosition");
-  const data = {position, direction, company, pillPosition};
+  const data = {position, direction, company, pillPosition, colorSchema};
   const { admin } = await authenticate.admin(request);
   const currentAppInstallationResponseJson = await queryId(request);
   const response = await admin.graphql(
@@ -118,6 +120,7 @@ export default function Index() {
   const [position, setPosition] = useState<string[]>([values.position]);
   const [pillPosition, setPillPosition] = useState<string[]>([values.pillPosition]);
   const [company, setCompany] = useState<string>(values.company);
+  const [colorSchema, setColorSchema] = useState<string[]>([values.colorSchema]);
   const [direction, setDirection] = useState<string[]>([values.direction]);
   const actionData = useActionData<typeof action>();
   const submit = useSubmit();
@@ -126,11 +129,11 @@ export default function Index() {
 
   useEffect(() => {
     if (test) {
-      shopify.toast.show("Saved!");
+      // shopify.toast.show("Saved!");
     }
   }, [test]);
 
-  const handleSubmit = () => submit({position, pillPosition, company, direction}, { replace: true, method: "POST" });
+  const handleSubmit = () => submit({position, pillPosition, company, direction, colorSchema}, { replace: true, method: "POST" });
 
   const handlePositionChange = useCallback((value: string[]) => setPosition(value), []);
 
@@ -139,6 +142,8 @@ export default function Index() {
   const handleDirectionChange = useCallback((value: string[]) => setDirection(value), []);
 
   const handleCompanyChange = useCallback((value: string) => setCompany(value), []);
+
+  const handleColorSchemaChange = useCallback((value: string[]) => setColorSchema(value), []);
 
   return (
     <Page narrowWidth>
@@ -185,6 +190,18 @@ export default function Index() {
                       ]}
                       selected={pillPosition}
                       onChange={handlePillPositionChange}
+                    />
+
+                    <ChoiceList
+                      title="Color"
+                      choices={[
+                        {label: '🔵', value: 'blue--theme'},
+                        {label: '🔴', value: 'red--theme'},
+                        {label: '🟢', value: 'green--theme'},
+                        {label: '🟡', value: 'yellow--theme'},
+                      ]}
+                      selected={colorSchema}
+                      onChange={handleColorSchemaChange}
                     />
 
                     <ChoiceList
