@@ -4,12 +4,24 @@ import {
   DeliveryMethod,
   shopifyApp,
   LATEST_API_VERSION,
+  BillingInterval,
 } from "@shopify/shopify-app-remix/server";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import { restResources } from "@shopify/shopify-api/rest/admin/2024-01";
 import prisma from "./db.server";
+import {BillingReplacementBehavior} from "@shopify/shopify-api";
+export const BEAUTIFUL_PLAN = 'Beautiful Monthly Subscription';
 
 const shopify = shopifyApp({
+  billing: {
+    [BEAUTIFUL_PLAN]: {
+      replacementBehavior: BillingReplacementBehavior.ApplyImmediately,
+      trialDays: 30,
+      interval: BillingInterval.Every30Days,
+      amount: 5,
+      currencyCode: 'EUR'
+    }
+  },
   apiKey: process.env.SHOPIFY_API_KEY,
   apiSecretKey: process.env.SHOPIFY_API_SECRET || "",
   apiVersion: LATEST_API_VERSION,
