@@ -18,9 +18,9 @@ import {
 } from "@shopify/polaris";
 import { authenticate } from "../shopify.server";
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { admin } = await authenticate.admin(request);
+const queryId = async (request: Request) => {
 
+  const { admin } = await authenticate.admin(request);
   const currentAppInstallationResponse = await admin.graphql(
     `#graphql
       query {
@@ -30,9 +30,13 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       }`
   );
 
-  const currentAppInstallationResponseJson = await currentAppInstallationResponse.json();
-  console.log(currentAppInstallationResponseJson.data)
+  return await currentAppInstallationResponse.json();
+}
 
+export const loader = async ({ request }: LoaderFunctionArgs) => {
+  const { admin } = await authenticate.admin(request);
+
+  const currentAppInstallationResponseJson = await queryId(request);
   const response = await admin.graphql(
     `#graphql
       query AppInstallationMetafields($ownerId: ID!) {
@@ -70,6 +74,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const pillPosition = formData.get("pillPosition");
   const data = {position, direction, company, pillPosition};
   const { admin } = await authenticate.admin(request);
+  const currentAppInstallationResponseJson = await queryId(request);
   const response = await admin.graphql(
     `#graphql
       mutation CreateAppDataMetafield($metafieldsSetInput: [MetafieldsSetInput!]!) {
@@ -94,7 +99,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
             key: "config",
             type: "json",
             value: JSON.stringify(data),
-            ownerId: "gid://shopify/AppInstallation/460629049559"
+            ownerId: `${currentAppInstallationResponseJson.data.currentAppInstallation.id}`
           }
         ]
       },
@@ -108,8 +113,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
 
 export default function Index() {
   const { data } = useLoaderData<typeof loader>();
-  const node = data.find((n: any) => (n.node.namespace === 'beautiful_consent' && n.node.key === 'config') ).node
-  const values = JSON.parse(node.value);
+  const node = data.find((n: any) => (n.node.namespace === 'beautiful_consent' && n.node.key === 'config') )?.node
+  const values = JSON.parse(node?.value ?? '{}');
   const [position, setPosition] = useState<string[]>([values.position]);
   const [pillPosition, setPillPosition] = useState<string[]>([values.pillPosition]);
   const [company, setCompany] = useState<string>(values.company);
@@ -121,6 +126,7 @@ export default function Index() {
 
   useEffect(() => {
     if (test) {
+      shopify.toast.show("Saved!");
     }
   }, [test]);
 
@@ -146,6 +152,7 @@ export default function Index() {
             >
               <img
                 width="100%"
+                alt="bc-logo"
                 height="100%"
                 style={{ objectFit: 'scale-down', objectPosition: 'center' }}
                 src="https://visibleprivacy.com/images/bc-logo.svg"
@@ -202,7 +209,7 @@ export default function Index() {
                       }
                     />
 
-                    <Button submit>Submit</Button>
+                    <Button submit>Save</Button>
                   </FormLayout>
                 </Form>
               </BlockStack>

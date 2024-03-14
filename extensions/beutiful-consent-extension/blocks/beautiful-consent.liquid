@@ -8,7 +8,7 @@ window.CONFIG = {
     colorSchema:"yellow--theme",
     havePill:true,
     companyName:"Empathy",
-    language: "es"
+    language: "en"
 };
 
 {% if app.metafields.beautiful_consent.config != blank %}
@@ -22,7 +22,7 @@ window.CONFIG = {
   colorSchema:"yellow--theme",
   havePill:true,
   companyName:savedConfig.company,
-  language: 'es'
+  language: 'en'
 };
 {% endif %}
 
@@ -32,7 +32,6 @@ const getCookieValue = (name) => (
   
 if (getCookieValue('BCConsent') === '' || getCookieValue('BCConsent') === 'false') {
     window.COOKIES_BLACKLIST = [
-      /mot-marioo-store/,
       /google-analytics\.com/,
       /googleads\.g\.doubleclick\.net/,
       /connect\.facebook\.net/
@@ -45,7 +44,11 @@ if (getCookieValue('BCConsent') === '' || getCookieValue('BCConsent') === 'false
 <script src="{{ 'block-cookies.js' | asset_url }}"></script>
 <script type="module" src="https://bc-staging.empathy.co/assets/index.js"></script>
 <link rel="stylesheet" type="text/css" href="https://bc-staging.empathy.co/assets/index.css" />
-<style> #bc-cmp { display: block } </style>
+<style>
+#bc-cmp { display: block; }
+html { font-size: 100%!important; }
+body { font-size: 62.5%!important; }
+</style>
 {% schema %}
   {
     "name": "Beautiful Consent",
