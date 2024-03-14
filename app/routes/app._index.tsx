@@ -13,7 +13,7 @@ import {
   BlockStack,
   Form,
   FormLayout,
-  Checkbox,
+  MediaCard,
   TextField,
 } from "@shopify/polaris";
 import { authenticate } from "../shopify.server";
@@ -125,6 +125,22 @@ export default function Index() {
   return (
     <Page narrowWidth>
         <Layout>
+
+        <Layout.Section>
+            <Card>
+            <MediaCard
+              title="Beautiful Consent by Motive.co"
+              description={`Plataforma de gestión de consentimiento (CMP) que prioriza la privacidad y ofrece una solución compatible tanto para comerciantes como para usuarios.`}
+            >
+              <img
+                width="100%"
+                height="100%"
+                style={{ objectFit: 'scale-down', objectPosition: 'center' }}
+                src="https://visibleprivacy.com/images/bc-logo.svg"
+              />
+            </MediaCard>
+            </Card>
+          </Layout.Section>
           <Layout.Section>
             <Card>
               <BlockStack gap="500">
