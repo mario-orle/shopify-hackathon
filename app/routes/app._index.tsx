@@ -129,7 +129,7 @@ export default function Index() {
 
   useEffect(() => {
     if (test) {
-      // shopify.toast.show("Saved!");
+      shopify.toast.show("Saved!");
     }
   }, [test]);
 
