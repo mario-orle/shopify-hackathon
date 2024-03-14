@@ -21,6 +21,18 @@ import { authenticate } from "../shopify.server";
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { admin } = await authenticate.admin(request);
 
+  const currentAppInstallationResponse = await admin.graphql(
+    `#graphql
+      query {
+        currentAppInstallation {
+          id
+        }
+      }`
+  );
+
+  const currentAppInstallationResponseJson = await currentAppInstallationResponse.json();
+  console.log(currentAppInstallationResponseJson.data)
+
   const response = await admin.graphql(
     `#graphql
       query AppInstallationMetafields($ownerId: ID!) {
@@ -39,7 +51,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       `,
     {
       variables: {
-        ownerId: "gid://shopify/AppInstallation/460629049559"
+        ownerId: `${currentAppInstallationResponseJson.data.currentAppInstallation.id}`
       },
     },
   );
@@ -104,7 +116,7 @@ export default function Index() {
   const [direction, setDirection] = useState<string[]>([values.direction]);
   const actionData = useActionData<typeof action>();
   const submit = useSubmit();
-  
+
   const test = actionData?.data;
 
   useEffect(() => {
@@ -115,7 +127,7 @@ export default function Index() {
   const handleSubmit = () => submit({position, pillPosition, company, direction}, { replace: true, method: "POST" });
 
   const handlePositionChange = useCallback((value: string[]) => setPosition(value), []);
-  
+
   const handlePillPositionChange = useCallback((value: string[]) => setPillPosition(value), []);
 
   const handleDirectionChange = useCallback((value: string[]) => setDirection(value), []);
