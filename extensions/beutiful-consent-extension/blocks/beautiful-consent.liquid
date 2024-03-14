@@ -1,4 +1,17 @@
 <script type="text/javascript">
+window.CONFIG = {
+    typography:"inter",
+    position:"center",
+    pillSize:"small",
+    pillPosition:"bottom-left",
+    direction:"Horizontal",
+    colorSchema:"yellow--theme",
+    havePill:true,
+    companyName:"Empathy",
+    language: "es"
+};
+
+{% if app.metafields.beautiful_consent.config != blank %}
 const savedConfig = {{ app.metafields.beautiful_consent.config }};
 window.CONFIG = {
   typography:"inter",
@@ -11,6 +24,8 @@ window.CONFIG = {
   companyName:savedConfig.company,
   language: 'es'
 };
+{% endif %}
+
 const getCookieValue = (name) => (
   document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() || ''
 );
