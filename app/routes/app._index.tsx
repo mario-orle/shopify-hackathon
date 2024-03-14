@@ -55,7 +55,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const position = formData.get("position");
   const direction = formData.get("direction");
   const company = formData.get("company");
-  const data = {position, direction, company};
+  const pillPosition = formData.get("pillPosition");
+  const data = {position, direction, company, pillPosition};
   const { admin } = await authenticate.admin(request);
   const response = await admin.graphql(
     `#graphql
@@ -98,6 +99,7 @@ export default function Index() {
   const node = data.find((n: any) => (n.node.namespace === 'beautiful_consent' && n.node.key === 'config') ).node
   const values = JSON.parse(node.value);
   const [position, setPosition] = useState<string[]>([values.position]);
+  const [pillPosition, setPillPosition] = useState<string[]>([values.pillPosition]);
   const [company, setCompany] = useState<string>(values.company);
   const [direction, setDirection] = useState<string[]>([values.direction]);
   const actionData = useActionData<typeof action>();
@@ -107,13 +109,14 @@ export default function Index() {
 
   useEffect(() => {
     if (test) {
-      shopify.toast.show("Config updated");
     }
   }, [test]);
 
-  const handleSubmit = () => submit({position, company, direction}, { replace: true, method: "POST" });
+  const handleSubmit = () => submit({position, pillPosition, company, direction}, { replace: true, method: "POST" });
 
   const handlePositionChange = useCallback((value: string[]) => setPosition(value), []);
+  
+  const handlePillPositionChange = useCallback((value: string[]) => setPillPosition(value), []);
 
   const handleDirectionChange = useCallback((value: string[]) => setDirection(value), []);
 
@@ -130,12 +133,23 @@ export default function Index() {
                     <ChoiceList
                       title="Position"
                       choices={[
-                        {label: 'Left', value: 'left'},
+                        {label: 'Top', value: 'top'},
                         {label: 'Center', value: 'center'},
-                        {label: 'Right', value: 'right'},
+                        {label: 'Bottom', value: 'bottom'},
                       ]}
                       selected={position}
                       onChange={handlePositionChange}
+                    />
+
+                    <ChoiceList
+                      title="Pill Position"
+                      choices={[
+                        {label: 'Left', value: 'bottom-left'},
+                        {label: 'Center', value: 'bottom'},
+                        {label: 'Rignt', value: 'bottom-right'},
+                      ]}
+                      selected={pillPosition}
+                      onChange={handlePillPositionChange}
                     />
 
                     <ChoiceList
