@@ -24,6 +24,14 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 };
 
 export const action = async ({ request }: ActionFunctionArgs) => {
+  const formData = await request.formData()
+  const position = formData.get("position");
+  const direction = formData.get("direction");
+  const company = formData.get("company");
+
+  console.log(formData);
+  const data = {position, direction, company};
+  console.log(JSON.stringify(data));
   const { admin } = await authenticate.admin(request);
   const response = await admin.graphql(
     `#graphql
@@ -45,20 +53,19 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       variables: {
         metafieldsSetInput: [
           {
-            namespace: "secret_keys",
-            key: "api_key",
+            namespace: "beautiful_consent",
+            key: "config",
             type: "json",
-            value: "aS1hbS1hLXNlY3JldC1hcGkta2V5Cg==",
-            ownerId: "gid://shopify/AppInstallation/3"
+            value: JSON.stringify(data),
+            ownerId: "gid://shopify/AppInstallation/460629049559"
           }
         ]
       },
     },
   );
   const responseJson = await response.json();
-
   return json({
-    data: responseJson.data?.productCreate?.product,
+    data: responseJson.data.metafieldsSet.metafields,
   });
 };
 
@@ -69,15 +76,15 @@ export default function Index() {
   const actionData = useActionData<typeof action>();
   const submit = useSubmit();
 
-  const productId = actionData?.data;
+  const test = actionData?.data;
 
   useEffect(() => {
-    if (productId) {
+    if (test) {
       shopify.toast.show("Config updated");
     }
-  }, [productId]);
+  }, [test]);
 
-  const handleSubmit = () => submit({}, { replace: true, method: "POST" });
+  const handleSubmit = () => submit({position, company, direction}, { replace: true, method: "POST" });
 
   const handlePositionChange = useCallback((value: string[]) => setPosition(value), []);
 
