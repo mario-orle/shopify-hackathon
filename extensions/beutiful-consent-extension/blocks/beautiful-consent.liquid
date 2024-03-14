@@ -1,16 +1,33 @@
 <script type="text/javascript">
+const savedConfig = {{ app.metafields.beautiful_consent.config }};
 window.CONFIG = {
   typography:"inter",
-  position:"center",
+  position: savedConfig.position,
   pillSize:"small",
-  pillPosition:"bottom-left",
-  direction:"Horizontal",
+  pillPosition:"center-left",
+  direction: savedConfig.direction,
   colorSchema:"yellow--theme",
   havePill:true,
   companyName:"Empathy",
   language: 'es'
+};
+const getCookieValue = (name) => (
+  document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)')?.pop() || ''
+);
+  
+if (getCookieValue('BCConsent') === '' || getCookieValue('BCConsent') === 'false') {
+    window.COOKIES_BLACKLIST = [
+      /mot-marioo-store/,
+      /google-analytics\.com/,
+      /googleads\.g\.doubleclick\.net/,
+      /connect\.facebook\.net/
+    ]
+} else if (getCookieValue('BCConsent') === 'true'){
+  window.COOKIES_BLACKLIST = [];
 }
+
 </script>
+<script src="{{ 'block-cookies.js' | asset_url }}"></script>
 <script type="module" src="https://bc-staging.empathy.co/assets/index.js"></script>
 <link rel="stylesheet" type="text/css" href="https://bc-staging.empathy.co/assets/index.css" />
 <style> #bc-cmp { display: block } </style>
